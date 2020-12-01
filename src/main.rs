@@ -17,5 +17,5 @@ fn a5() {
 }
 
 fn a9() {
-    Program::new("inputs/input-9").exec_stdio();
+    Program::new("inputs/input-9").execute(|| 2, |val| println!("{}", val));
 }
