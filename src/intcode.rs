@@ -11,9 +11,11 @@ const JUMP_IF_TRUE: usize = 5;
 const JUMP_IF_FALSE: usize = 6;
 const LESS_THAN: usize = 7;
 const EQUALS: usize = 8;
+const ADD_TO_REL_BASE: usize = 9;
 
-const PARAMETER_MODE: usize = 0;
+const POSITION_MODE: usize = 0;
 const IMMEDIATE_MODE: usize = 1;
+const RELATIVE_MODE: usize = 2;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Status {
@@ -29,6 +31,7 @@ pub struct Program {
     pub ip: usize,
     pub modes: Vec<usize>,
     pub status: Status,
+    relative_base: isize
 }
 
 impl Program {
@@ -36,12 +39,14 @@ impl Program {
         Program {
             data: read_to_string(location)
                 .expect("Failed to read program")
+                .trim()
                 .split(',')
                 .map(|int| int.parse().expect("Invalid number"))
                 .collect(),
             ip: 0,
             modes: Vec::with_capacity(5),
             status: Status::Ready,
+            relative_base: 0
         }
     }
 
@@ -87,12 +92,16 @@ impl Program {
             let inst = self.decode();
             match inst {
                 ADD => {
-                    self.store(3, self.param(1) + self.param(2));
+                    let a = self.param(1);
+                    let b = self.param(2);
+                    self.store(3, a + b);
                     self.ip += 4;
                 }
 
                 MUL => {
-                    self.store(3, self.param(1) * self.param(2));
+                    let a = self.param(1);
+                    let b = self.param(2);
+                    self.store(3, a * b);
                     self.ip += 4;
                 }
 
@@ -104,6 +113,11 @@ impl Program {
 
                 LESS_THAN => self.compare(|a, b| a < b),
                 EQUALS => self.compare(|a, b| a == b),
+
+                ADD_TO_REL_BASE => {
+                    self.relative_base += self.param(1);
+                    self.ip += 2;
+                }
 
                 HALT => self.status = Status::Halted,
 
@@ -161,30 +175,44 @@ impl Program {
         self.modes.pop().unwrap() + (self.modes.pop().unwrap_or(0) * 10)
     }
 
-    fn param(&self, offset: usize) -> isize {
+    fn param(&mut self, offset: usize) -> isize {
+        let idx = self.idx_of(offset);
+        self.get(idx)
+    }
+
+    fn store(&mut self, offset: usize, val: isize) {
+        let idx = self.idx_of(offset);
+        self.set(idx as usize, val);
+    }
+
+    fn idx_of(&mut self, offset: usize) -> usize {
         let mode = if self.modes.len() >= offset {
             self.modes[self.modes.len() - offset]
         } else {
-            PARAMETER_MODE
+            POSITION_MODE
         };
 
         match mode {
-            PARAMETER_MODE => self.get(self.get(self.ip + offset) as usize),
-            IMMEDIATE_MODE => self.get(self.ip + offset),
+            POSITION_MODE => self.get(self.ip + offset) as usize,
+            IMMEDIATE_MODE => self.ip + offset,
+            RELATIVE_MODE => (self.relative_base + self.get(self.ip + offset)) as usize,
             _ => panic!("unknown parameter mode"),
         }
     }
 
-    fn store(&mut self, offset: usize, val: isize) {
-        let idx = self.get(self.ip + offset);
-        self.data[idx as usize] = val;
-    }
-
-    pub fn get(&self, loc: usize) -> isize {
+    pub fn get(&mut self, loc: usize) -> isize {
+        self.maybe_resize(loc);
         self.data[loc]
     }
 
-    pub fn set(&mut self, offset: usize, val: isize) {
-        self.data[self.ip + offset] = val;
+    pub fn set(&mut self, loc: usize, val: isize) {
+        self.maybe_resize(loc);
+        self.data[loc] = val;
+    }
+
+    fn maybe_resize(&mut self, loc: usize) {
+        if loc >= self.data.len() {
+            self.data.resize(loc + 10, 0);
+        }
     }
 }

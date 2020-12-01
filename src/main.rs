@@ -9,9 +9,13 @@ mod a8;
 mod intcode;
 
 fn main() {
-    a82();
+    a9();
 }
 
 fn a5() {
     Program::new("input-5").exec_stdio();
+}
+
+fn a9() {
+    Program::new("input-9").exec_stdio();
 }
