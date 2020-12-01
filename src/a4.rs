@@ -11,7 +11,7 @@ fn a42() {
 }
 
 fn run<T: Fn((&[u32], usize, u32)) -> bool>(cond: T) {
-        let mut count = 0;
+    let mut count = 0;
     for num in 245182usize..790572usize {
         let digits: Vec<u32> = num
             .to_string()
@@ -26,7 +26,11 @@ fn run<T: Fn((&[u32], usize, u32)) -> bool>(cond: T) {
             continue;
         }
 
-        count += digits.iter().enumerate().take(5).any(|(a, b)| cond((&digits, a, *b))) as i32;
+        count += digits
+            .iter()
+            .enumerate()
+            .take(5)
+            .any(|(a, b)| cond((&digits, a, *b))) as i32;
     }
     println!("{}", count);
 }
