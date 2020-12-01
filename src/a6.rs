@@ -1,4 +1,4 @@
-use std::{collections::HashMap, cell::RefCell, fs::read_to_string, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fs::read_to_string, rc::Rc};
 
 #[derive(Default, Clone)]
 struct Object {
@@ -20,18 +20,27 @@ pub fn a6() {
         let orbiting = split.next().unwrap().to_string();
         let object = split.next().unwrap().to_string();
         orbits.insert(object.to_string(), orbiting);
-        objects.insert(object.to_string(), Rc::new(RefCell::new(Object {
-            name: object.to_string(),
-            ..Object::default()
-        })));
+        objects.insert(
+            object.to_string(),
+            Rc::new(RefCell::new(Object {
+                name: object.to_string(),
+                ..Object::default()
+            })),
+        );
     }
-    objects.insert("COM".to_string(), Rc::new(RefCell::new(Object {
-        name: "COM".to_string(),
-        ..Object::default()
-    })));
+    objects.insert(
+        "COM".to_string(),
+        Rc::new(RefCell::new(Object {
+            name: "COM".to_string(),
+            ..Object::default()
+        })),
+    );
 
     for (object, orbiting) in orbits {
-        objects[&orbiting].borrow_mut().orbited_by.push(objects[&object].clone());
+        objects[&orbiting]
+            .borrow_mut()
+            .orbited_by
+            .push(objects[&object].clone());
         objects[&object].borrow_mut().orbiting = Some(objects[&orbiting].clone());
     }
 
@@ -53,7 +62,7 @@ fn deeper(obj: &Object, nesting: usize) -> usize {
 fn deeper_santa(you: &Object, dist: usize) -> usize {
     for obj in you.orbited_by.iter() {
         if let Some(depth) = has_santa(&obj.borrow(), 0) {
-            return dist + depth
+            return dist + depth;
         }
     }
     deeper_santa(&you.orbiting.as_ref().unwrap().borrow(), dist + 1)

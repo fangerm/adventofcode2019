@@ -15,6 +15,7 @@ const EQUALS: usize = 8;
 const PARAMETER_MODE: usize = 0;
 const IMMEDIATE_MODE: usize = 1;
 
+#[derive(Debug, Clone)]
 pub struct Program {
     pub data: Vec<isize>,
     pub ip: usize,
@@ -34,7 +35,27 @@ impl Program {
         }
     }
 
-    pub fn execute(&mut self) {
+    pub fn exec_stdio(&mut self) {
+        self.execute(
+            || {
+                let stdin = io::stdin();
+                let line = stdin
+                    .lock()
+                    .lines()
+                    .next()
+                    .expect("there was no next line")
+                    .expect("the line could not be read");
+                line.parse().expect("User input NaN")
+            },
+            |num| println!("{}", num),
+        );
+    }
+
+    pub fn execute<I, O>(&mut self, mut input: I, mut output: O)
+    where
+        I: FnMut() -> isize,
+        O: FnMut(isize),
+    {
         loop {
             let inst = self.decode();
             // println!("INST: {} ({}), IP: {}", inst, self.data[self.ip], self.ip);
@@ -50,19 +71,12 @@ impl Program {
                 }
 
                 IN => {
-                    let stdin = io::stdin();
-                    let line = stdin
-                        .lock()
-                        .lines()
-                        .next()
-                        .expect("there was no next line")
-                        .expect("the line could not be read");
-                    self.store(1, line.parse().expect("User input NaN"));
+                    self.store(1, input());
                     self.ip += 2;
                 }
 
                 OUT => {
-                    println!("{}", self.param(1));
+                    output(self.param(1));
                     self.ip += 2;
                 }
 
