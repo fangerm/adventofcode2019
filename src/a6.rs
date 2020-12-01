@@ -12,7 +12,7 @@ pub fn a6() {
     let mut orbits = HashMap::<String, String>::new();
     let mut objects = HashMap::<String, Rc<RefCell<Object>>>::new();
 
-    for line in read_to_string("input-6")
+    for line in read_to_string("inputs/input-6")
         .expect("Failed to read map")
         .lines()
     {

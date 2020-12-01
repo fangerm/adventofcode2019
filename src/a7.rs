@@ -43,7 +43,7 @@ pub fn a7(min: isize, max: isize) {
 }
 
 fn a7_exec(values: &[isize]) -> isize {
-    let mut amps = iter::repeat(Program::new("input-7"))
+    let mut amps = iter::repeat(Program::new("inputs/input-7"))
         .take(5)
         .collect::<Vec<_>>();
     let last_out = Cell::new(0);

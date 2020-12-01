@@ -5,7 +5,7 @@ const HEIGHT: usize = 6;
 const LAYER_COUNT: usize = WIDTH * HEIGHT;
 
 pub fn a81() {
-    let str = read_to_string("input-8").expect("Failed to read image");
+    let str = read_to_string("inputs/input-8").expect("Failed to read image");
     let mut digits = str.chars().map(|c| c.to_digit(10).expect("NaN"));
 
     let mut smallest_zero_count = 9999999;
@@ -35,7 +35,7 @@ pub fn a81() {
 
 pub fn a82() {
     let mut pixels = [[2; WIDTH]; HEIGHT];
-    let str = read_to_string("input-8").expect("Failed to read image");
+    let str = read_to_string("inputs/input-8").expect("Failed to read image");
     let mut digits = str.chars().map(|c| c.to_digit(10).expect("NaN"));
 
     while digits.size_hint().0 != 0 {

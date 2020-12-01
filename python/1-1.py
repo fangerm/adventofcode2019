@@ -1,5 +1,5 @@
 numbers = []
-with open("input-1", 'r') as f:
+with open("inputs/input-1", 'r') as f:
     r = f.readline()
     while r != "":
         numbers.append(int(r))

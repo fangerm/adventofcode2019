@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::fs::read_to_string;
 
 fn a3() {
-    let raw_data = read_to_string("input-3")
+    let raw_data = read_to_string("inputs/input-3")
         .expect("Failed to read program")
         .lines()
         .map(|line| line.split(',').map(String::from).collect::<Vec<String>>())

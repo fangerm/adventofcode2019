@@ -13,9 +13,9 @@ fn main() {
 }
 
 fn a5() {
-    Program::new("input-5").exec_stdio();
+    Program::new("inputs/input-5").exec_stdio();
 }
 
 fn a9() {
-    Program::new("input-9").exec_stdio();
+    Program::new("inputs/input-9").exec_stdio();
 }
