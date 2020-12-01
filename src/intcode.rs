@@ -15,11 +15,20 @@ const EQUALS: usize = 8;
 const PARAMETER_MODE: usize = 0;
 const IMMEDIATE_MODE: usize = 1;
 
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum Status {
+    Ready,
+    Output(isize),
+    WaitOnInput,
+    Halted,
+}
+
 #[derive(Debug, Clone)]
 pub struct Program {
     pub data: Vec<isize>,
     pub ip: usize,
     pub modes: Vec<usize>,
+    pub status: Status,
 }
 
 impl Program {
@@ -32,6 +41,7 @@ impl Program {
                 .collect(),
             ip: 0,
             modes: Vec::with_capacity(5),
+            status: Status::Ready,
         }
     }
 
@@ -57,8 +67,24 @@ impl Program {
         O: FnMut(isize),
     {
         loop {
+            let run = self.execute_halt();
+            match run {
+                Status::Output(out) => {
+                    output(out);
+                    self.resume_output();
+                }
+                Status::WaitOnInput => {
+                    self.resume_input(input());
+                }
+                Status::Halted => return,
+                _ => (),
+            }
+        }
+    }
+
+    pub fn execute_halt(&mut self) -> Status {
+        loop {
             let inst = self.decode();
-            // println!("INST: {} ({}), IP: {}", inst, self.data[self.ip], self.ip);
             match inst {
                 ADD => {
                     self.store(3, self.param(1) + self.param(2));
@@ -70,15 +96,8 @@ impl Program {
                     self.ip += 4;
                 }
 
-                IN => {
-                    self.store(1, input());
-                    self.ip += 2;
-                }
-
-                OUT => {
-                    output(self.param(1));
-                    self.ip += 2;
-                }
+                IN => self.status = Status::WaitOnInput,
+                OUT => self.status = Status::Output(self.param(1)),
 
                 JUMP_IF_TRUE => self.jump(|v| v != 0),
                 JUMP_IF_FALSE => self.jump(|v| v == 0),
@@ -86,14 +105,33 @@ impl Program {
                 LESS_THAN => self.compare(|a, b| a < b),
                 EQUALS => self.compare(|a, b| a == b),
 
-                HALT => break,
+                HALT => self.status = Status::Halted,
 
                 _ => panic!(
                     "unknown opcode {} at ip {}, memory {:?}",
                     inst, self.ip, self.data
                 ),
             }
+
+            if self.status != Status::Ready {
+                return self.status;
+            }
         }
+    }
+
+    pub fn resume_input(&mut self, input: isize) -> Status {
+        assert!(matches!(self.status, Status::WaitOnInput));
+        self.status = Status::Ready;
+        self.store(1, input);
+        self.ip += 2;
+        self.execute_halt()
+    }
+
+    pub fn resume_output(&mut self) -> Status {
+        assert!(matches!(self.status, Status::Output(_)));
+        self.status = Status::Ready;
+        self.ip += 2;
+        self.execute_halt()
     }
 
     fn jump<T: Fn(isize) -> bool>(&mut self, condition: T) {

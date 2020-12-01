@@ -1,4 +1,4 @@
-use crate::a7::a7;
+use crate::a7::a72;
 use crate::intcode::Program;
 
 mod a3;
@@ -8,7 +8,7 @@ mod a7;
 mod intcode;
 
 fn main() {
-    a7();
+    a72();
 }
 
 fn a5() {

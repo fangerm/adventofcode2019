@@ -1,16 +1,24 @@
-use crate::intcode::Program;
-use std::iter;
-use std::cmp::max;
+use crate::intcode::{Program, Status};
 use std::cell::Cell;
+use std::cmp::{max, min};
+use std::{cmp, iter};
 
-pub fn a7() {
+pub fn a71() {
+    a7(0, 5)
+}
+
+pub fn a72() {
+    a7(5, 10)
+}
+
+pub fn a7(min: isize, max: isize) {
     let mut max_amp = 0;
     // Thanks, I hate it!
-    for a in 0..5 {
-        for b in 0..5 {
-            for c in 0..5 {
-                for d in 0..5 {
-                    for e in 0..5 {
+    for a in min..max {
+        for b in min..max {
+            for c in min..max {
+                for d in min..max {
+                    for e in min..max {
                         if a == b
                             || a == c
                             || a == d
@@ -24,7 +32,7 @@ pub fn a7() {
                         {
                             continue;
                         } else {
-                            max_amp = max(_a7(&[a, b, c, d, e]), max_amp);
+                            max_amp = cmp::max(a7_exec(&[a, b, c, d, e]), max_amp);
                         }
                     }
                 }
@@ -34,18 +42,37 @@ pub fn a7() {
     println!("{}", max_amp);
 }
 
-fn _a7(values: &[isize]) -> isize {
-    let amps = iter::repeat(Program::new("input-7")).take(5).collect::<Vec<_>>();
+fn a7_exec(values: &[isize]) -> isize {
+    let mut amps = iter::repeat(Program::new("input-7"))
+        .take(5)
+        .collect::<Vec<_>>();
     let last_out = Cell::new(0);
-    for (mut amp, value) in amps.into_iter().zip(values) {
-        let mut second_in = false;
-        amp.execute(
-            || if second_in { last_out.get() } else {
-                second_in = true;
-                *value
-            },
-            |value| last_out.set(value)
-        );
+
+    for (mut amp, value) in amps.iter_mut().zip(values) {
+        amp.execute_halt(); // Execute up to needing phase
+        amp.resume_input(*value); // Give it the phase, now suspended on thrust
     }
+
+    let mut index = 0;
+    loop {
+        let mut amp = &mut amps[index];
+        if amp.status == Status::Halted {
+            break;
+        }
+
+        let out = amp.resume_input(last_out.get());
+        match out {
+            Status::Output(out) => last_out.set(out),
+            _ => (),
+        }
+        amp.resume_output();
+
+        index = if index == values.len() - 1 {
+            0
+        } else {
+            index + 1
+        };
+    }
+
     last_out.get()
 }
