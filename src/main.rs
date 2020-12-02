@@ -1,10 +1,13 @@
 #![allow(dead_code)]
+#![feature(destructuring_assignment)]
 
 use crate::intcode::Program;
-use a11::*;
+use a12::*;
+use a4::*;
 
 mod a10;
 mod a11;
+mod a12;
 mod a3;
 mod a4;
 mod a6;
@@ -19,8 +22,8 @@ struct Point {
 }
 
 fn main() {
-    a11_1();
-    a11_2();
+    a12_1();
+    a12_2();
 }
 
 fn a5() {
