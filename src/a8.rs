@@ -39,11 +39,11 @@ pub fn a82() {
     let mut digits = str.chars().map(|c| c.to_digit(10).expect("NaN"));
 
     while digits.size_hint().0 != 0 {
-        for h in 0..HEIGHT {
-            for w in 0..WIDTH {
+        for row in pixels.iter_mut() {
+            for pixel in row.iter_mut() {
                 let digit = digits.next().unwrap();
-                if pixels[h][w] == 2 {
-                    pixels[h][w] = digit
+                if *pixel == 2 {
+                    *pixel = digit
                 }
             }
         }

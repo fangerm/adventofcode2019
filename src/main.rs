@@ -1,4 +1,5 @@
-use crate::a8::a82;
+#![allow(dead_code)]
+
 use crate::intcode::Program;
 
 mod a3;

@@ -1,6 +1,5 @@
 use crate::intcode::{Program, Status};
 use std::cell::Cell;
-use std::cmp::{max, min};
 use std::{cmp, iter};
 
 pub fn a71() {
@@ -48,22 +47,21 @@ fn a7_exec(values: &[isize]) -> isize {
         .collect::<Vec<_>>();
     let last_out = Cell::new(0);
 
-    for (mut amp, value) in amps.iter_mut().zip(values) {
+    for (amp, value) in amps.iter_mut().zip(values) {
         amp.execute_halt(); // Execute up to needing phase
         amp.resume_input(*value); // Give it the phase, now suspended on thrust
     }
 
     let mut index = 0;
     loop {
-        let mut amp = &mut amps[index];
+        let amp = &mut amps[index];
         if amp.status == Status::Halted {
             break;
         }
 
         let out = amp.resume_input(last_out.get());
-        match out {
-            Status::Output(out) => last_out.set(out),
-            _ => (),
+        if let Status::Output(out) = out {
+            last_out.set(out)
         }
         amp.resume_output();
 
