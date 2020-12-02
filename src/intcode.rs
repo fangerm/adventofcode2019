@@ -2,6 +2,8 @@ use std::fs::read_to_string;
 use std::io;
 use std::io::BufRead;
 
+use enum_methods::{EnumIntoGetters, EnumIsA};
+
 const HALT: usize = 99;
 const ADD: usize = 1;
 const MUL: usize = 2;
@@ -17,7 +19,7 @@ const POSITION_MODE: usize = 0;
 const IMMEDIATE_MODE: usize = 1;
 const RELATIVE_MODE: usize = 2;
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, EnumIntoGetters, EnumIsA)]
 pub enum Status {
     Ready,
     Output(isize),
@@ -31,7 +33,7 @@ pub struct Program {
     pub ip: usize,
     pub modes: Vec<usize>,
     pub status: Status,
-    relative_base: isize
+    relative_base: isize,
 }
 
 impl Program {
@@ -46,7 +48,7 @@ impl Program {
             ip: 0,
             modes: Vec::with_capacity(5),
             status: Status::Ready,
-            relative_base: 0
+            relative_base: 0,
         }
     }
 

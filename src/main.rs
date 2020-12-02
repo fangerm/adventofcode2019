@@ -1,18 +1,26 @@
 #![allow(dead_code)]
 
-use a10::a10;
 use crate::intcode::Program;
+use a11::*;
 
+mod a10;
+mod a11;
 mod a3;
 mod a4;
 mod a6;
 mod a7;
 mod a8;
-mod a10;
 mod intcode;
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+struct Point {
+    x: isize,
+    y: isize,
+}
+
 fn main() {
-    a10();
+    a11_1();
+    a11_2();
 }
 
 fn a5() {

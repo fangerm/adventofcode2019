@@ -1,9 +1,5 @@
-use std::{collections::HashMap, cell::RefCell, fs::read_to_string};
-
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-struct Point {
-    x: usize, y: usize
-}
+use crate::Point;
+use std::{cell::RefCell, collections::HashMap, fs::read_to_string};
 
 pub fn a10() {
     // TODO: This does not work.
@@ -16,7 +12,7 @@ pub fn a10() {
     let mut map = HashMap::<Point, RefCell<HashMap<i64, Point>>>::new();
     for (x, line) in asteroids.iter().enumerate() {
         for (y, _) in line.iter().filter(|e| **e).enumerate() {
-            map.insert(Point { x, y }, Default::default());
+            // map.insert(Point { x, y }, Default::default());
         }
     }
 
@@ -29,13 +25,17 @@ pub fn a10() {
         }
     }
 
-    let max = map.iter().max_by_key(|(_, visible)| visible.borrow().len()).unwrap();
+    let max = map
+        .iter()
+        .max_by_key(|(_, visible)| visible.borrow().len())
+        .unwrap();
     println!("{:?}: {}", max.0, max.1.borrow().len());
 }
 
-
 fn get_angle(a: &Point, b: &Point) -> f64 {
-    let angle = (b.y as f64 - a.y as f64).atan2((b.x as f64 - a.x as f64) as f64).to_degrees();
+    let angle = (b.y as f64 - a.y as f64)
+        .atan2((b.x as f64 - a.x as f64) as f64)
+        .to_degrees();
     if angle < 0.0 {
         angle + 360.0
     } else {
